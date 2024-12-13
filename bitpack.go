@@ -60,14 +60,15 @@ func NewBitPack[T any]() *BitPack[T] {
 }
 
 func (bp BitPack[T]) Size() int {
-	return int(bp.typemap[len(bp.typemap)-1].offset) + bp.typemap[len(bp.typemap)-1].size
+	lastType := bp.typemap[len(bp.typemap)-1]
+
+	return lastType.offset + lastType.size
 }
 
-func (bp *BitPack[T]) Serialize(ser *T) uint64 {
+func (bp *BitPack[T]) Pack(ser *T) uint64 {
 	var pack uint64 = 0
 
 	value := reflect.Indirect(reflect.ValueOf(ser))
-	offset := 0
 
 	for idx, typeinfo := range bp.typemap {
 		field := value.Field(idx)
@@ -76,27 +77,25 @@ func (bp *BitPack[T]) Serialize(ser *T) uint64 {
 		switch switchTypes[T](typeinfo.typ) {
 		case typeBits:
 			arbSize := field.Interface().(bits)
-			pack |= arbSize.Serialize() << offset
+			pack |= arbSize.Serialize() << uint64(typeinfo.offset)
 
 		case typeBool:
 			if field.Bool() {
-				pack |= 0b1 << offset
+				pack |= 0b1 << typeinfo.offset
 			}
 
 		case typeUints:
-			pack |= field.Uint() & mask << offset
+			pack |= field.Uint() & mask << uint64(typeinfo.offset)
 
 		case typeInts:
-			pack |= uint64(field.Int()) & mask << offset
+			pack |= uint64(field.Int()) & mask << uint64(typeinfo.offset)
 		}
-
-		offset += typeinfo.size
 	}
 
 	return pack
 }
 
-func (bp *BitPack[T]) Deserialize(pack uint64) *T {
+func (bp *BitPack[T]) Unpack(pack uint64) *T {
 	output := new(T)
 	value := reflect.Indirect(reflect.ValueOf(output))
 
@@ -108,23 +107,21 @@ func (bp *BitPack[T]) Deserialize(pack uint64) *T {
 			data &= mask
 		}
 
-		var cast any
+		var cast reflect.Value
 
 		switch switchTypes[T](typeinfo.typ) {
 		case typeBits:
-			arbSize := reflect.New(typeinfo.typ).Elem()
-			arbSize.Field(0).SetInt(int64(data))
-
-			value.Field(idx).Set(arbSize)
+			cast = reflect.New(typeinfo.typ).Elem()
+			cast.Field(0).SetInt(int64(data))
 
 		case typeBool:
-			cast = castBool(data)
-			value.Field(idx).Set(reflect.ValueOf(cast))
+			cast = reflect.ValueOf(castBool(data))
 
 		case typeUints, typeInts:
-			cast = castInt(typeinfo.typ, data)
-			value.Field(idx).Set(reflect.ValueOf(cast))
+			cast = reflect.ValueOf(castInt(typeinfo.typ, data))
 		}
+
+		value.Field(idx).Set(cast)
 	}
 
 	return output
