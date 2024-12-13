@@ -20,7 +20,7 @@ var (
 )
 
 func (bp *BitPack[T]) Debug(value T) {
-	pack := fmt.Sprintf("%064s", strconv.FormatUint(bp.Pack(&value), 2))
+	pack := fmt.Sprintf("%064s", strconv.FormatUint(bp.Pack(value), 2))
 
 	paddings := make([]int, len(bp.typemap))
 

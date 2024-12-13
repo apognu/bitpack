@@ -28,10 +28,10 @@ func main() {
 		E: bitpack.NewBit38(0b111001),
 	}
 
-	bits := bp.Pack(&t)
+	pack := bp.Pack(t)
 
-	fmt.Println("PACK  ", strconv.FormatUint(bits, 2))
-	fmt.Printf("STRUCT %#v\n", bp.Unpack(bits))
+	fmt.Println("PACK  ", strconv.FormatUint(pack, 2))
+	fmt.Printf("STRUCT %#v\n", bp.Unpack(pack))
 
 	bp.Debug(t)
 }

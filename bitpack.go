@@ -38,8 +38,7 @@ func NewBitPack[T any]() *BitPack[T] {
 
 		switch switchTypes[T](field.Type) {
 		case typeBits:
-			arbSize := reflect.New(field.Type).Interface().(bits)
-			size = arbSize.Size()
+			size = reflect.New(field.Type).Interface().(bits).Size()
 		case typeBool:
 			size = 1
 		case typeUints, typeInts:
@@ -65,10 +64,10 @@ func (bp BitPack[T]) Size() int {
 	return lastType.offset + lastType.size
 }
 
-func (bp *BitPack[T]) Pack(ser *T) uint64 {
+func (bp *BitPack[T]) Pack(unpacked T) uint64 {
 	var pack uint64 = 0
 
-	value := reflect.Indirect(reflect.ValueOf(ser))
+	value := reflect.Indirect(reflect.ValueOf(unpacked))
 
 	for idx, typeinfo := range bp.typemap {
 		field := value.Field(idx)
@@ -76,8 +75,7 @@ func (bp *BitPack[T]) Pack(ser *T) uint64 {
 
 		switch switchTypes[T](typeinfo.typ) {
 		case typeBits:
-			arbSize := field.Interface().(bits)
-			pack |= arbSize.Serialize() << uint64(typeinfo.offset)
+			pack |= field.Interface().(bits).Serialize() << uint64(typeinfo.offset)
 
 		case typeBool:
 			if field.Bool() {
@@ -95,13 +93,13 @@ func (bp *BitPack[T]) Pack(ser *T) uint64 {
 	return pack
 }
 
-func (bp *BitPack[T]) Unpack(pack uint64) *T {
-	output := new(T)
-	value := reflect.Indirect(reflect.ValueOf(output))
+func (bp *BitPack[T]) Unpack(packed uint64) *T {
+	object := new(T)
+	value := reflect.Indirect(reflect.ValueOf(object))
 
 	for idx, typeinfo := range bp.typemap {
 		mask := uint64(math.Pow(2, float64(typeinfo.size))) - 1
-		data := pack >> typeinfo.offset
+		data := packed >> typeinfo.offset
 
 		if typeinfo.size < 64 {
 			data &= mask
@@ -124,5 +122,5 @@ func (bp *BitPack[T]) Unpack(pack uint64) *T {
 		value.Field(idx).Set(cast)
 	}
 
-	return output
+	return object
 }

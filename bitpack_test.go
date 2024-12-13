@@ -39,8 +39,8 @@ func TestFourInt16(t *testing.T) {
 	bp := NewBitPack[fourInt16]()
 	v := fourInt16{1, 2, 3, 4}
 
-	assert.Equal(t, uint64(0b100000000000000001100000000000000100000000000000001), bp.Pack(&v))
-	assert.Equal(t, v, *bp.Unpack(bp.Pack(&v)))
+	assert.Equal(t, uint64(0b100000000000000001100000000000000100000000000000001), bp.Pack(v))
+	assert.Equal(t, v, *bp.Unpack(bp.Pack(v)))
 }
 
 func TestOneInt64(t *testing.T) {
@@ -51,8 +51,8 @@ func TestOneInt64(t *testing.T) {
 	bp := NewBitPack[oneInt64]()
 	v := oneInt64{42}
 
-	assert.Equal(t, uint64(0b101010), bp.Pack(&v))
-	assert.Equal(t, v, *bp.Unpack(bp.Pack(&v)))
+	assert.Equal(t, uint64(0b101010), bp.Pack(v))
+	assert.Equal(t, v, *bp.Unpack(bp.Pack(v)))
 }
 
 func TestAllUnsignedTypes(t *testing.T) {
@@ -66,8 +66,8 @@ func TestAllUnsignedTypes(t *testing.T) {
 	bp := NewBitPack[allUnsignedTypes]()
 	v := allUnsignedTypes{200000, 9000, 42, true}
 
-	assert.Equal(t, uint64(0b100101010001000110010100000000000000000110000110101000000), bp.Pack(&v))
-	assert.Equal(t, v, *bp.Unpack(bp.Pack(&v)))
+	assert.Equal(t, uint64(0b100101010001000110010100000000000000000110000110101000000), bp.Pack(v))
+	assert.Equal(t, v, *bp.Unpack(bp.Pack(v)))
 }
 
 func TestAllSignedTypes(t *testing.T) {
@@ -81,8 +81,8 @@ func TestAllSignedTypes(t *testing.T) {
 	bp := NewBitPack[allSignedTypes]()
 	v := allSignedTypes{-200000, 9000, -42, true}
 
-	assert.Equal(t, uint64(0b111010110001000110010100011111111111111001111001011000000), bp.Pack(&v))
-	assert.Equal(t, v, *bp.Unpack(bp.Pack(&v)))
+	assert.Equal(t, uint64(0b111010110001000110010100011111111111111001111001011000000), bp.Pack(v))
+	assert.Equal(t, v, *bp.Unpack(bp.Pack(v)))
 }
 
 func TestMixed(t *testing.T) {
@@ -96,8 +96,8 @@ func TestMixed(t *testing.T) {
 	bp := NewBitPack[mixed]()
 	v := mixed{-128, true, 9000, -1}
 
-	assert.Equal(t, uint64(0b111111111111111100000000000000000010001100101000110000000), bp.Pack(&v))
-	assert.Equal(t, v, *bp.Unpack(bp.Pack(&v)))
+	assert.Equal(t, uint64(0b111111111111111100000000000000000010001100101000110000000), bp.Pack(v))
+	assert.Equal(t, v, *bp.Unpack(bp.Pack(v)))
 }
 
 func TestBooleans(t *testing.T) {
@@ -117,8 +117,8 @@ func TestBooleans(t *testing.T) {
 	bp := NewBitPack[tenBooleans]()
 	v := tenBooleans{true, false, false, true, true, false, false, true, false, true}
 
-	assert.Equal(t, uint64(0b1010011001), bp.Pack(&v))
-	assert.Equal(t, v, *bp.Unpack(bp.Pack(&v)))
+	assert.Equal(t, uint64(0b1010011001), bp.Pack(v))
+	assert.Equal(t, v, *bp.Unpack(bp.Pack(v)))
 }
 
 func TestArbitraryBits(t *testing.T) {
@@ -132,8 +132,8 @@ func TestArbitraryBits(t *testing.T) {
 	bp := NewBitPack[tenVarying]()
 	v := tenVarying{NewBit1(0b1), NewBit2(0b10), NewBit4(0b1010), NewBit40(0b111111)}
 
-	assert.Equal(t, uint64(0b1111111010101), bp.Pack(&v))
-	assert.Equal(t, v, *bp.Unpack(bp.Pack(&v)))
+	assert.Equal(t, uint64(0b1111111010101), bp.Pack(v))
+	assert.Equal(t, v, *bp.Unpack(bp.Pack(v)))
 }
 
 func TestArbitraryBoundsCheck(t *testing.T) {
