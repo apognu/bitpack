@@ -5,7 +5,6 @@ import (
 	"reflect"
 	"slices"
 	"strconv"
-	"strings"
 
 	"github.com/fatih/color"
 )
@@ -21,7 +20,7 @@ var (
 )
 
 func (bp *BitPack[T]) Debug(value T) {
-	bits := fmt.Sprintf("%064s", strconv.FormatUint(bp.Serialize(&value), 2))
+	pack := fmt.Sprintf("%064s", strconv.FormatUint(bp.Serialize(&value), 2))
 
 	paddings := make([]int, len(bp.typemap))
 
@@ -33,7 +32,7 @@ func (bp *BitPack[T]) Debug(value T) {
 		start := PayloadSize - int(typeinfo.offset) - typeinfo.size
 		end := start + typeinfo.size
 
-		colors[idx%len(colors)].Print(bits[start:end])
+		colors[idx%len(colors)].Print(pack[start:end])
 
 		fmt.Print(" ")
 	}
@@ -61,24 +60,15 @@ func (bp *BitPack[T]) Debug(value T) {
 
 		var v any
 
-		switch {
-		case strings.HasPrefix(field.Type.String(), "bitpack.Bit"):
-			v = value.Interface().(Arbitrary).Serialize()
-
-		default:
-			switch field.Type.Kind() {
-			case reflect.Bool:
-				v = value.Bool()
-
-			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-				v = value.Uint()
-
-			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-				v = value.Int()
-
-			default:
-				panic(fmt.Sprintf("%T contains a %s field, which is not supported by BitPacks", *new(T), field.Type.Kind()))
-			}
+		switch switchTypes[T](field.Type) {
+		case typeBits:
+			v = value.Interface().(bits).Serialize()
+		case typeBool:
+			v = value.Bool()
+		case typeUints:
+			v = value.Uint()
+		case typeInts:
+			v = value.Int()
 		}
 
 		printValue(displayIndex, v)

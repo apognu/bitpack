@@ -1,10 +1,43 @@
 package bitpack
 
 import (
+	"fmt"
 	"reflect"
+	"strings"
 
 	"golang.org/x/exp/constraints"
 )
+
+type types int
+
+const (
+	typeBits types = iota
+	typeBool
+	typeUints
+	typeInts
+)
+
+func switchTypes[T any](typ reflect.Type) types {
+	switch {
+	case strings.HasPrefix(typ.String(), "bitpack.Bit"):
+		return typeBits
+
+	default:
+		switch typ.Kind() {
+		case reflect.Bool:
+			return typeBool
+
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			return typeUints
+
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			return typeInts
+
+		default:
+			panic(fmt.Sprintf("%T contains a %s field, which is not supported by BitPacks", *new(T), typ.Kind()))
+		}
+	}
+}
 
 func castBool(value uint64) bool {
 	return value == 1

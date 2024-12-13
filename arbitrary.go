@@ -1,6 +1,6 @@
 package bitpack
 
-type Arbitrary interface {
+type bits interface {
 	Size() int
 	Serialize() uint64
 }
