@@ -18,15 +18,15 @@ type typeinfo struct {
 	offset int
 }
 
-type BitPack[T any] struct {
+type BitPack[BP any] struct {
 	typemap []typeinfo
 }
 
-func NewBitPack[T any]() *BitPack[T] {
-	typ := reflect.TypeOf((*T)(nil))
+func NewBitPack[BP any]() *BitPack[BP] {
+	typ := reflect.TypeOf((*BP)(nil))
 
 	if typ.Elem().Kind() != reflect.Struct {
-		panic(fmt.Sprintf("BitPacks can only built from structs, %T is %s", *new(T), typ.Elem().Kind()))
+		panic(fmt.Sprintf("BitPacks can only built from structs, %T is %s", *new(BP), typ.Elem().Kind()))
 	}
 
 	typemap := make([]typeinfo, typ.Elem().NumField())
@@ -36,7 +36,7 @@ func NewBitPack[T any]() *BitPack[T] {
 		field := typ.Elem().Field(idx)
 		size := 0
 
-		switch switchTypes[T](field.Type) {
+		switch switchTypes[BP](field.Type) {
 		case typeBits:
 			size = reflect.New(field.Type).Interface().(bits).Size()
 		case typeBool:
@@ -50,21 +50,21 @@ func NewBitPack[T any]() *BitPack[T] {
 	}
 
 	if offset > PayloadSize {
-		panic(fmt.Sprintf("%T is %d bits long, but BitPacks can only store %d bits", *new(T), offset, PayloadSize))
+		panic(fmt.Sprintf("%T is %d bits long, but BitPacks can only store %d bits", *new(BP), offset, PayloadSize))
 	}
 
-	return &BitPack[T]{
+	return &BitPack[BP]{
 		typemap: typemap,
 	}
 }
 
-func (bp BitPack[T]) Size() int {
+func (bp BitPack[BP]) Size() int {
 	lastType := bp.typemap[len(bp.typemap)-1]
 
 	return lastType.offset + lastType.size
 }
 
-func (bp *BitPack[T]) Pack(unpacked T) uint64 {
+func (bp *BitPack[BP]) Pack(unpacked BP) uint64 {
 	var pack uint64 = 0
 
 	value := reflect.Indirect(reflect.ValueOf(unpacked))
@@ -73,7 +73,7 @@ func (bp *BitPack[T]) Pack(unpacked T) uint64 {
 		field := value.Field(idx)
 		mask := uint64(math.Pow(2, float64(typeinfo.size))) - 1
 
-		switch switchTypes[T](typeinfo.typ) {
+		switch switchTypes[BP](typeinfo.typ) {
 		case typeBits:
 			pack |= field.Interface().(bits).Serialize() << uint64(typeinfo.offset)
 
@@ -93,8 +93,8 @@ func (bp *BitPack[T]) Pack(unpacked T) uint64 {
 	return pack
 }
 
-func (bp *BitPack[T]) Unpack(packed uint64) *T {
-	object := new(T)
+func (bp *BitPack[BP]) Unpack(packed uint64) *BP {
+	object := new(BP)
 	value := reflect.Indirect(reflect.ValueOf(object))
 
 	for idx, typeinfo := range bp.typemap {
@@ -107,7 +107,7 @@ func (bp *BitPack[T]) Unpack(packed uint64) *T {
 
 		var cast reflect.Value
 
-		switch switchTypes[T](typeinfo.typ) {
+		switch switchTypes[BP](typeinfo.typ) {
 		case typeBits:
 			cast = reflect.New(typeinfo.typ).Elem()
 			cast.Field(0).SetInt(int64(data))

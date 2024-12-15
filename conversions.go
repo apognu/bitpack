@@ -17,9 +17,13 @@ const (
 	typeInts
 )
 
-func switchTypes[T any](typ reflect.Type) types {
+const (
+	BitsPrefix = "bitpack.Bit"
+)
+
+func switchTypes[BP any](typ reflect.Type) types {
 	switch {
-	case strings.HasPrefix(typ.String(), "bitpack.Bit"):
+	case strings.HasPrefix(typ.String(), BitsPrefix):
 		return typeBits
 
 	default:
@@ -34,7 +38,7 @@ func switchTypes[T any](typ reflect.Type) types {
 			return typeInts
 
 		default:
-			panic(fmt.Sprintf("%T contains a %s field, which is not supported by BitPacks", *new(T), typ.Kind()))
+			panic(fmt.Sprintf("%T contains a %s field, which is not supported by BitPacks", *new(BP), typ.Kind()))
 		}
 	}
 }
@@ -67,5 +71,5 @@ func castInt[T constraints.Integer](typ reflect.Type, value T) any {
 		return int64(value)
 	}
 
-	panic("unreachable, BitPack cannot have member")
+	panic(fmt.Sprintf("unreachable, BitPack cannot have %T member", value))
 }
