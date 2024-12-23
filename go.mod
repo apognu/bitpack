@@ -3,7 +3,6 @@ module github.com/apognu/bitpack
 go 1.23.0
 
 require (
-	github.com/chenxingqiang/go-floatx v0.0.0-20240103165049-2f5e300cb3c3
 	github.com/fatih/color v1.18.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/exp v0.0.0-20241210194714-1829a127f884

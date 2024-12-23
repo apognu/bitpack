@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/apognu/bitpack"
-	"github.com/chenxingqiang/go-floatx"
 )
 
 type MyType struct {
@@ -30,8 +29,6 @@ func main() {
 		E: bitpack.NewBit6(0b111001),
 		F: 42.9001,
 	}
-
-	fmt.Println("TEST", floatx.F16Frombits(floatx.F16Fromfloat32(1.2).Bits()).Float32() == 1.2)
 
 	pack := bp.Pack(t)
 
