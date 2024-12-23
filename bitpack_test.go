@@ -142,3 +142,16 @@ func TestArbitraryBoundsCheck(t *testing.T) {
 	assert.NotPanics(t, func() { NewBit12(0b100000000000) })
 	assert.Panics(t, func() { NewBit12(0b1000000000000) })
 }
+
+func TestFloat32(t *testing.T) {
+	type floats struct {
+		One float32
+		Two float32
+	}
+
+	bp := NewBitPack[floats]()
+	v := floats{42.9, 9000.42}
+
+	assert.Equal(t, uint64(0b0100011000001100101000011010111001000010001010111001100110011010), bp.Pack(v))
+	assert.Equal(t, v, *bp.Unpack(bp.Pack(v)))
+}

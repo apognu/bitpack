@@ -15,16 +15,22 @@ const (
 	typeBool
 	typeUints
 	typeInts
+	typeFloat16
+	typeFloat32
 )
 
 const (
 	BitsPrefix = "bitpack.Bit"
+	Float16    = "floatx.Float16"
 )
 
 func switchTypes[BP any](typ reflect.Type) types {
 	switch {
 	case strings.HasPrefix(typ.String(), BitsPrefix):
 		return typeBits
+
+	case typ.String() == Float16:
+		return typeFloat16
 
 	default:
 		switch typ.Kind() {
@@ -36,6 +42,9 @@ func switchTypes[BP any](typ reflect.Type) types {
 
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			return typeInts
+
+		case reflect.Float32:
+			return typeFloat32
 
 		default:
 			panic(fmt.Sprintf("%T contains a %s field, which is not supported by BitPacks", *new(BP), typ.Kind()))

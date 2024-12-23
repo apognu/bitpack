@@ -43,6 +43,8 @@ func NewBitPack[BP any]() *BitPack[BP] {
 			size = 1
 		case typeUints, typeInts:
 			size = field.Type.Bits()
+		case typeFloat32:
+			size = field.Type.Bits()
 		}
 
 		typemap[idx] = typeinfo{typ: field.Type, size: size, offset: offset}
@@ -87,6 +89,9 @@ func (bp *BitPack[BP]) Pack(unpacked BP) uint64 {
 
 		case typeInts:
 			pack |= uint64(field.Int()) & mask << uint64(typeinfo.offset)
+
+		case typeFloat32:
+			pack |= uint64(math.Float32bits(float32(field.Float()))) & mask << uint64(typeinfo.offset)
 		}
 	}
 
@@ -117,6 +122,9 @@ func (bp *BitPack[BP]) Unpack(packed uint64) *BP {
 
 		case typeUints, typeInts:
 			cast = reflect.ValueOf(castInt(typeinfo.typ, data))
+
+		case typeFloat32:
+			cast = reflect.ValueOf(math.Float32frombits(uint32(data)))
 		}
 
 		value.Field(idx).Set(cast)

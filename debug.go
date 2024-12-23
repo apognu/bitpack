@@ -69,6 +69,10 @@ func (bp *BitPack[T]) Debug(value T) {
 			v = value.Uint()
 		case typeInts:
 			v = value.Int()
+		case typeFloat32:
+			v = value.Float()
+		default:
+			v = "<unimplemented>"
 		}
 
 		printValue(displayIndex, v)
