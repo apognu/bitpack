@@ -39,11 +39,11 @@ func NewBitPack[BP any]() *BitPack[BP] {
 		switch switchTypes[BP](field.Type) {
 		case typeBits:
 			size = reflect.New(field.Type).Interface().(bits).Size()
+
 		case typeBool:
 			size = 1
-		case typeUints, typeInts:
-			size = field.Type.Bits()
-		case typeFloat32:
+
+		default:
 			size = field.Type.Bits()
 		}
 
